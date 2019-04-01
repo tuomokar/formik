@@ -197,6 +197,17 @@ export interface FormikConfig<Values> extends FormikSharedConfig {
   initialStatus?: any;
 
   /**
+   * Function used to check equality of values when `enableReinitialize`
+   * property is true.
+   */
+  valuesIsEqual?: (a: any, b: any) => boolean;
+
+  /**
+   * Function used to check whether or not the form's values is dirty.
+   */
+  initialValuesIsEqualToCurrent?: (a: any, b: any) => boolean;
+
+  /**
    * Reset handler
    */
   onReset?: (values: Values, formikActions: FormikActions<Values>) => void;

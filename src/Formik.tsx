@@ -1,6 +1,6 @@
 import * as React from 'react';
-import isEqual from 'react-fast-compare';
 import deepmerge from 'deepmerge';
+import defaultIsEqual from 'react-fast-compare';
 import { FormikProvider } from './connect';
 import warning from 'tiny-warning';
 import {
@@ -111,7 +111,7 @@ export class Formik<Values = FormikValues> extends React.Component<
     // If the initialValues change, reset the form
     if (
       this.props.enableReinitialize &&
-      !isEqual(prevProps.initialValues, this.props.initialValues)
+      !this.valuesIsEqual(prevProps.initialValues, this.props.initialValues)
     ) {
       this.initialValues = this.props.initialValues;
       // @todo refactor to use getDerivedStateFromProps?
@@ -288,7 +288,7 @@ export class Formik<Values = FormikValues> extends React.Component<
       .then((errors: FormikErrors<Values>) => {
         if (this.didMount) {
           this.setState(prevState => {
-            if (!isEqual(prevState.errors, errors)) {
+            if (!defaultIsEqual(prevState.errors, errors)) {
               return { errors };
             }
             return null; // abort the update
@@ -593,7 +593,10 @@ export class Formik<Values = FormikValues> extends React.Component<
 
   getFormikComputedProps = () => {
     const { isInitialValid } = this.props;
-    const dirty = !isEqual(this.initialValues, this.state.values);
+    const dirty = !this.initialValuesIsEqualToCurrent(
+      this.initialValues,
+      this.state.values
+    );
     return {
       dirty,
       isValid: dirty
@@ -630,6 +633,18 @@ export class Formik<Values = FormikValues> extends React.Component<
       initialValues: this.initialValues,
     };
   };
+
+  valuesIsEqual(previousValues: any, currentValues: any) {
+    return this.props.valuesIsEqual
+      ? this.props.valuesIsEqual(previousValues, currentValues)
+      : defaultIsEqual(previousValues, currentValues);
+  }
+
+  initialValuesIsEqualToCurrent(initialValues: any, currentValues: any) {
+    return this.props.initialValuesIsEqualToCurrent
+      ? this.props.initialValuesIsEqualToCurrent(initialValues, currentValues)
+      : defaultIsEqual(initialValues, currentValues);
+  }
 
   render() {
     const { component, render, children } = this.props;
